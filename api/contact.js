@@ -1,22 +1,11 @@
 'use strict';
 
-/**
- * POST /api/contact
- * Reçoit { name, email, lang, company (piège anti-spam), elapsed } et :
- *   1) envoie un e-mail chaleureux au visiteur pour engager la conversation,
- *   2) t'envoie une copie (nom + e-mail du visiteur) pour que tu puisses le relancer.
- *
- * SMTP : Gmail (smtp.gmail.com) avec un "mot de passe d'application".
- * Variables d'environnement : GMAIL_USER, GMAIL_APP_PASSWORD, OWNER_EMAIL (optionnelle).
- */
-
 const nodemailer = require('nodemailer');
 
 const OWNER_NAME = 'Moubarack ILATEMA';
 const WHATSAPP_URL = 'https://wa.me/2290169892699';
 const WHATSAPP_LABEL = '+229 01 69 89 26 99';
 
-// Couleurs des e-mails (à garder identiques à la palette du site : public/css/style.css, bloc :root)
 const T = {
   navy900: '#07122a',
   navy800: '#0b1a3b',
@@ -28,7 +17,6 @@ const T = {
   inkMute: '#4a5a80',
 };
 
-/* ---------- Limitation de débit (au mieux, en mémoire) ---------- */
 const ipHits = new Map();
 const emailHits = new Map();
 
@@ -45,7 +33,6 @@ function limited(map, key, max, windowMs) {
   return false;
 }
 
-/* ---------- Utilitaires ---------- */
 const esc = (s) =>
   String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -83,7 +70,6 @@ function getTransporter(user, pass) {
   return transporter;
 }
 
-/* ---------- Contenu des e-mails ---------- */
 const COPY = {
   fr: {
     subject: (n) => `Merci pour votre visite, ${n} — parlons de votre projet`,
@@ -102,7 +88,7 @@ const COPY = {
     cta: 'Répondre à Moubarack',
     mailSubject: 'Mon projet',
     bye: 'Au plaisir de vous lire,',
-    role: 'Développeur Full-Stack · Freelance',
+    role: 'Développeur de solutions numériques · Freelance',
     foot: 'Vous recevez ce message car vous avez rempli le formulaire de contact de mon portfolio. Si ce n’est pas vous, ignorez simplement cet e-mail.',
   },
   en: {
@@ -122,7 +108,7 @@ const COPY = {
     cta: 'Reply to Moubarack',
     mailSubject: 'My project',
     bye: 'Looking forward to hearing from you,',
-    role: 'Full-Stack Developer · Freelance',
+    role: 'Digital solutions developer · Freelance',
     foot: 'You are receiving this message because you filled in the contact form on my portfolio. If this wasn’t you, simply ignore this email.',
   },
 };
@@ -205,7 +191,6 @@ function ownerMail(name, email, lang) {
   return { subject: `Nouveau contact portfolio : ${name}`, text, html };
 }
 
-/* ---------- Handler ---------- */
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
 
@@ -226,8 +211,6 @@ module.exports = async function handler(req, res) {
 
   const lang = body.lang === 'en' ? 'en' : 'fr';
 
-  // Pièges anti-robots : champ invisible rempli, ou formulaire envoyé trop vite.
-  // On répond "ok" sans rien envoyer pour ne rien révéler au robot.
   if (body.company || Number(body.elapsed) < 1500) {
     return res.status(200).json({ ok: true });
   }
@@ -249,7 +232,7 @@ module.exports = async function handler(req, res) {
   const user = process.env.GMAIL_USER;
   const pass = String(process.env.GMAIL_APP_PASSWORD || '').replace(/\s+/g, '');
   const ownerEmail = process.env.OWNER_EMAIL || user;
-  const local = !process.env.VERCEL; // en local, on renvoie la cause exacte pour t'aider à déboguer
+  const local = !process.env.VERCEL;
   if (!user || !pass) {
     console.error('[contact] GMAIL_USER / GMAIL_APP_PASSWORD manquants (fichier .env introuvable ou mal rempli ?)');
     return res.status(500).json({ ok: false, error: 'not_configured', ...(local && { hint: 'GMAIL_USER / GMAIL_APP_PASSWORD manquants' }) });

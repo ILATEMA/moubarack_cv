@@ -1,10 +1,5 @@
 'use strict';
 
-/**
- * Diagnostic de l'envoi d'e-mails.   Lance :   npm run check-mail
- * Vérifie le fichier .env, la connexion à Gmail, et dit précisément ce qui ne va pas.
- */
-
 const fs = require('fs');
 const path = require('path');
 

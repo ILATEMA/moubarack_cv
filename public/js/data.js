@@ -1,31 +1,21 @@
-/**
- * Données du portfolio — c'est ICI que tu modifies tes contacts, tes niveaux et tes vidéos.
- * Les textes (titres, descriptions) sont dans i18n.js (français + anglais).
- */
-
 export const SITE = {
   email: 'moubarackilatem@gmail.com',
-  whatsapp: '2290169892699', // format international, sans "+" ni espaces
+  whatsapp: '2290169892699',
   whatsappDisplay: '+229 01 69 89 26 99',
 };
 
-/**
- * Projets. `driveId` = l'identifiant dans le lien Google Drive :
- * https://drive.google.com/file/d/<driveId>/view
- * (la vidéo doit être partagée en « Toute personne disposant du lien »).
- */
-export const PROJECTS = [
-  { id: 'event', n: '01', driveId: '1C-EIBQfgJtmF9cySFndc2IkrkYg_8e_c' },
-  { id: 'commercial', n: '02', driveId: '1lxqudhNvqoITkPawP8rvmYGKX4y8DTaz' },
-  { id: 'bus', n: '03', driveId: '15-SztEFpetthDUKls3DIlMHr4-Hp1gIs' },
-  { id: 'school', n: '04', driveId: '1aD_YDItnPdmNbaBQd5L-V38PSaoP5-qQ' },
+export const SITES = [
+  { id: 'hotel', n: '01', url: 'https://hotel-paradisia-6wof.vercel.app', host: 'hotel-paradisia-6wof.vercel.app' },
+  { id: 'restaurant', n: '02', url: 'https://splendorous-frangollo-0917b4.netlify.app/', host: 'splendorous-frangollo-0917b4.netlify.app' },
 ];
 
-/**
- * Compétences. `level` = niveau de 1 à 5 (les barres corail).
- * Ce sont des estimations par palier : ajuste-les librement.
- * `name` peut être un texte simple ou { fr, en }.
- */
+export const APPS = [
+  { id: 'event', n: '03', driveId: '1C-EIBQfgJtmF9cySFndc2IkrkYg_8e_c' },
+  { id: 'commercial', n: '04', driveId: '1lxqudhNvqoITkPawP8rvmYGKX4y8DTaz' },
+  { id: 'bus', n: '05', driveId: '15-SztEFpetthDUKls3DIlMHr4-Hp1gIs' },
+  { id: 'school', n: '06', driveId: '1aD_YDItnPdmNbaBQd5L-V38PSaoP5-qQ' },
+];
+
 export const SKILLS = [
   {
     id: 'mastered',
@@ -69,8 +59,15 @@ export const SKILLS = [
   },
 ];
 
-/** Bandeau défilant (technologies) */
 export const MARQUEE = [
   'Java', 'Spring Boot', 'React', 'NestJS', 'JavaScript', 'PHP', 'MySQL', 'Electron',
   'Flutter', 'Laravel', 'Python', 'C / C++', 'UML', 'Merise', 'Machine Learning', 'DevOps',
+];
+
+export const GUIDE_STEPS = [
+  { key: 'guide.s0', target: '#start .cta .btn-primary' },
+  { key: 'guide.s1', target: '#levels a[data-sec="2"]' },
+  { key: 'guide.s2', target: '#levels a[data-sec="3"]' },
+  { key: 'guide.s3', target: '#projets .site-btn' },
+  { key: 'guide.s4', target: '#submitBtn' },
 ];

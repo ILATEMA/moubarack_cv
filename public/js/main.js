@@ -1,9 +1,7 @@
 import { dict, detectLang } from './i18n.js';
-import { SITE, PROJECTS, SKILLS, MARQUEE } from './data.js';
+import { SITE, SITES, APPS, SKILLS, MARQUEE } from './data.js';
+import { initGuide } from './guide.js';
 
-/* =========================================================
-   Utilitaires
-   ========================================================= */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const root = document.documentElement;
@@ -14,16 +12,14 @@ const isMobile = matchMedia('(max-width: 860px)').matches || !finePointer;
 
 const store = {
   get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
-  set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* navigation privée */ } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {  } },
 };
 
-try { history.scrollRestoration = 'manual'; } catch (e) { /* ignore */ }
+try { history.scrollRestoration = 'manual'; } catch (e) {  }
 
 let started = false;
+let guide = null;
 
-/* =========================================================
-   Langue (FR / EN)
-   ========================================================= */
 let lang = store.get('lang') || detectLang();
 if (!dict[lang]) lang = 'fr';
 const tr = (k) => (dict[lang][k] !== undefined ? dict[lang][k] : dict.fr[k] !== undefined ? dict.fr[k] : k);
@@ -44,7 +40,8 @@ function applyLang() {
   renderSkills();
   renderProjects();
   updateHud(currentIndex, true);
-  startTypewriter();
+  showJob(true);
+  if (guide) guide.refresh();
 
   if (modalProject) setModalTexts(modalProject);
 }
@@ -56,9 +53,6 @@ $$('.lang button').forEach((b) => b.addEventListener('click', () => {
   applyLang();
 }));
 
-/* =========================================================
-   Rendu : marquee, compétences, projets
-   ========================================================= */
 function renderMarquee() {
   const host = $('#marquee');
   const row = MARQUEE.map((m) => `<span>${m}</span>`).join('');
@@ -93,11 +87,25 @@ const ICON_PLAY = '<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="
 const ICON_ARROW = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_LOCK = '<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 10.5V8a3.5 3.5 0 017 0v2.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="15.5" r="1.4" fill="currentColor"/></svg>';
 
-const thumbCache = new Map(); // driveId -> true/false (vignette Drive disponible ?)
+const thumbCache = new Map();
 
-function renderProjects() {
-  const host = $('#projectGrid');
-  host.innerHTML = PROJECTS.map((p, i) => `
+const siteCard = (p, i) => `
+    <article class="project project--site reveal ${started ? 'in' : ''}" style="--d:${i % 2}">
+      <div class="project-in" data-tilt>
+        <div class="cover cover--site">
+          <div class="mock-bar"><i></i><i></i><i></i><span>${p.host}</span></div>
+          <div class="mock-body"><strong>${tr(`project.${p.id}.t`)}</strong><u></u><u></u><u></u><span class="num" aria-hidden="true">${p.n}</span></div>
+        </div>
+        <div class="project-body">
+          <div class="tags"><span class="tag">${tr(`project.${p.id}.tag`)}</span><span class="tag tag--alt">${tr('projects.live')}</span></div>
+          <h3>${tr(`project.${p.id}.t`)}</h3>
+          <p>${tr(`project.${p.id}.d`)}</p>
+          <a class="btn btn-primary btn-sm site-btn" href="${p.url}" target="_blank" rel="noopener" aria-label="${tr('projects.visit')} — ${tr(`project.${p.id}.t`)}"><span>${tr('projects.visit')}</span>${ICON_ARROW}</a>
+        </div>
+      </div>
+    </article>`;
+
+const appCard = (p, i) => `
     <article class="project reveal ${started ? 'in' : ''}" style="--d:${i % 2}" data-open="${p.id}" tabindex="0" role="button" aria-label="${tr('projects.watch')} — ${tr(`project.${p.id}.t`)}">
       <div class="project-in" data-tilt>
         <div class="cover" data-thumb="${p.driveId}">
@@ -110,9 +118,15 @@ function renderProjects() {
           <p>${tr(`project.${p.id}.d`)}</p>
           <span class="go">${tr('projects.watch')} ${ICON_ARROW}</span>
         </div>
-        <span class="glare" aria-hidden="true"></span>
       </div>
-    </article>`).join('') + `
+    </article>`;
+
+function renderProjects() {
+  const host = $('#projectGrid');
+  host.innerHTML = `<h3 class="proj-label">${tr('projects.sites')}</h3>`
+    + SITES.map(siteCard).join('')
+    + `<h3 class="proj-label">${tr('projects.apps')}</h3>`
+    + APPS.map(appCard).join('') + `
     <article class="project project--locked reveal ${started ? 'in' : ''}" style="--d:1">
       <div class="project-in">
         <span class="lock" aria-hidden="true">${ICON_LOCK}</span>
@@ -124,7 +138,6 @@ function renderProjects() {
       </div>
     </article>`;
 
-  // Vignettes Google Drive (si disponibles) — sinon on garde le visuel stylisé
   $$('.cover[data-thumb]', host).forEach((c) => {
     const id = c.dataset.thumb;
     const url = `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
@@ -143,29 +156,28 @@ function renderProjects() {
   observeNew(host);
 }
 
-/* =========================================================
-   Machine à écrire
-   ========================================================= */
 let twTimer = 0;
-function startTypewriter() {
+let jobShown = false;
+function showJob(langChange) {
   clearTimeout(twTimer);
   const el = $('#role');
-  const roles = tr('hero.roles');
-  if (reduced) { el.textContent = roles[0]; return; }
-  let i = 0, j = 0, del = false;
+  const box = el.parentElement;
+  const text = tr('hero.job');
+  if (reduced || (langChange && jobShown) || !started) {
+    el.textContent = text;
+    if (jobShown || reduced) box.classList.add('typed');
+    return;
+  }
+  jobShown = true;
+  let j = 0;
   (function tick() {
-    const w = roles[i];
-    el.textContent = w.slice(0, j);
-    if (!del && j === w.length) { del = true; twTimer = setTimeout(tick, 1900); return; }
-    if (del && j === 0) { del = false; i = (i + 1) % roles.length; }
-    j += del ? -1 : 1;
-    twTimer = setTimeout(tick, del ? 26 : 58);
+    j += 1;
+    el.textContent = text.slice(0, j);
+    if (j < text.length) { twTimer = setTimeout(tick, 48); return; }
+    box.classList.add('typed');
   })();
 }
 
-/* =========================================================
-   Titre : découpage en lettres
-   ========================================================= */
 let charIndex = 0;
 $$('[data-split]').forEach((line) => {
   const txt = line.textContent;
@@ -179,7 +191,6 @@ $$('[data-split]').forEach((line) => {
   });
 });
 
-/* Ajuste la taille du nom pour qu'il remplisse la colonne, quelle que soit la police chargée */
 function fitName() {
   const h = $('.name');
   if (!h) return;
@@ -197,9 +208,6 @@ window.addEventListener('resize', fitName, { passive: true });
 (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(fitName);
 fitName();
 
-/* =========================================================
-   Révélation au scroll + compteurs + barres de niveau
-   ========================================================= */
 const io = new IntersectionObserver((entries) => {
   entries.forEach((e) => {
     if (!e.isIntersecting) return;
@@ -213,7 +221,7 @@ const io = new IntersectionObserver((entries) => {
 }, { threshold: 0.14, rootMargin: '0px 0px -6% 0px' });
 
 function observeNew(scope) {
-  if (!started) return; // on n'observe qu'une fois le jeu lancé
+  if (!started) return;
   $$('.reveal:not(.in)', scope).forEach((el) => io.observe(el));
   $$('.reveal.in', scope).forEach((el) => { $$('.pip.on', el).forEach((p) => p.classList.add('fill')); });
 }
@@ -232,34 +240,25 @@ function countUp(el) {
   })(t0);
 }
 
-/* =========================================================
-   Inclinaison 3D (cartes)
-   ========================================================= */
 function bindTilt(scope = document) {
   if (!finePointer || reduced) return;
   $$('[data-tilt]', scope).forEach((el) => {
     if (el.dataset.tiltBound) return;
     el.dataset.tiltBound = '1';
-    const glare = $('.glare', el);
     el.addEventListener('pointermove', (e) => {
       const r = el.getBoundingClientRect();
       const x = (e.clientX - r.left) / r.width;
       const y = (e.clientY - r.top) / r.height;
       el.style.setProperty('--ry', `${(x - 0.5) * 12}deg`);
       el.style.setProperty('--rx', `${(0.5 - y) * 10}deg`);
-      if (glare) { glare.style.setProperty('--mx', `${x * 100}%`); glare.style.setProperty('--my', `${y * 100}%`); glare.style.setProperty('--go', '1'); }
     });
     el.addEventListener('pointerleave', () => {
       el.style.setProperty('--ry', '0deg');
       el.style.setProperty('--rx', '0deg');
-      if (glare) glare.style.setProperty('--go', '0');
     });
   });
 }
 
-/* =========================================================
-   Curseur personnalisé
-   ========================================================= */
 if (finePointer && !reduced) {
   const cur = $('.cursor');
   let cx = 0, cy = 0, tx = 0, ty = 0;
@@ -274,9 +273,6 @@ if (finePointer && !reduced) {
   })();
 }
 
-/* =========================================================
-   Scroll : niveaux, barre XP, scène 3D
-   ========================================================= */
 const sections = $$('main > section.level');
 const navLinks = $$('#levels a');
 let anchors = [], maxScroll = 1;
@@ -326,14 +322,13 @@ function onScroll() {
     const sf = sectionFloat(y);
     if (scene) scene.setSection(sf);
     const idx = Math.round(sf);
-    if (idx !== currentIndex) { currentIndex = idx; updateHud(idx); }
+    if (idx !== currentIndex) { currentIndex = idx; updateHud(idx); if (started && guide) guide.onSection(idx); }
   });
 }
 window.addEventListener('scroll', onScroll, { passive: true });
 window.addEventListener('resize', () => { measure(); onScroll(); }, { passive: true });
 if ('ResizeObserver' in window) new ResizeObserver(() => { measure(); onScroll(); }).observe(document.body);
 
-// Navigation douce
 document.addEventListener('click', (e) => {
   const a = e.target.closest('a[href^="#"]');
   if (!a) return;
@@ -346,9 +341,6 @@ document.addEventListener('click', (e) => {
   window.scrollTo({ top, behavior: reduced ? 'auto' : 'smooth' });
 });
 
-/* =========================================================
-   Modale vidéo (Google Drive)
-   ========================================================= */
 const modal = $('#modal');
 const frame = $('#modalFrame');
 let modalProject = null;
@@ -361,13 +353,14 @@ function setModalTexts(id) {
 }
 
 function openModal(id) {
-  const p = PROJECTS.find((x) => x.id === id);
+  const p = APPS.find((x) => x.id === id);
   if (!p) return;
   modalProject = id;
   lastFocus = document.activeElement;
   setModalTexts(id);
   frame.src = `https://drive.google.com/file/d/${p.driveId}/preview`;
   $('#modalDrive').href = `https://drive.google.com/file/d/${p.driveId}/view`;
+  if (guide) guide.hide();
   modal.classList.add('open');
   modal.setAttribute('aria-hidden', 'false');
   root.classList.add('modal-open');
@@ -380,7 +373,7 @@ function closeModal() {
   modal.classList.remove('open');
   modal.setAttribute('aria-hidden', 'true');
   root.classList.remove('modal-open');
-  setTimeout(() => { if (!modalProject) frame.src = 'about:blank'; }, 400); // coupe la lecture
+  setTimeout(() => { if (!modalProject) frame.src = 'about:blank'; }, 400);
   if (lastFocus && lastFocus.focus) lastFocus.focus();
 }
 
@@ -392,7 +385,6 @@ document.addEventListener('click', (e) => {
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeModal();
   if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('[data-open]')) { e.preventDefault(); openModal(e.target.dataset.open); }
-  // Piège à focus dans la modale
   if (e.key === 'Tab' && modalProject) {
     const f = $$('button, a[href], iframe', modal).filter((el) => !el.disabled);
     if (!f.length) return;
@@ -402,9 +394,6 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-/* =========================================================
-   Formulaire de contact
-   ========================================================= */
 const form = $('#contactForm');
 const statusEl = $('#formStatus');
 const submitBtn = $('#submitBtn');
@@ -441,7 +430,7 @@ form.addEventListener('submit', async (e) => {
       body: JSON.stringify({ name, email, lang, company: fd.get('company') || '', elapsed: Date.now() - pageLoadedAt }),
     });
     let data = {};
-    try { data = await res.json(); } catch (err) { /* réponse non JSON */ }
+    try { data = await res.json(); } catch (err) {  }
     if (res.ok && data.ok) {
       form.hidden = true;
       $('#formDone').hidden = false;
@@ -460,9 +449,6 @@ form.addEventListener('submit', async (e) => {
 });
 form.addEventListener('input', (e) => e.target.classList && e.target.classList.remove('bad'));
 
-/* =========================================================
-   Écran de démarrage + 3D
-   ========================================================= */
 const loader = $('#loader');
 const loaderBar = $('#loaderBar');
 const loaderStatus = $('#loaderStatus');
@@ -477,7 +463,6 @@ const setProg = (v) => { progTarget = Math.max(progTarget, v); };
   if (!started) requestAnimationFrame(progLoop);
 })();
 
-// Contacts (modifiables dans data.js)
 $('#mailLink').href = `mailto:${SITE.email}`;
 $('#mailLink strong').textContent = SITE.email;
 $('#waLink').href = `https://wa.me/${SITE.whatsapp}`;
@@ -501,6 +486,19 @@ const sceneReady = (async () => {
   setProg(75);
 })();
 
+const guideReady = (async () => {
+  const idle = { show() {}, hide() {}, wave() {}, talk() {}, jump() {}, point() {}, look() {} };
+  let character = idle;
+  try {
+    const mod = await import('./character.js');
+    character = mod.initCharacter($('#guideCanvas'), { reducedMotion: reduced });
+  } catch (err) {
+    console.warn('Personnage 3D indisponible :', err);
+    $('#guideAvatar').hidden = true;
+  }
+  guide = initGuide({ tr, character, reducedMotion: reduced });
+})();
+
 const pageLoaded = new Promise((res) => {
   if (document.readyState === 'complete') res();
   else window.addEventListener('load', res, { once: true });
@@ -508,7 +506,7 @@ const pageLoaded = new Promise((res) => {
 
 const timeout = new Promise((res) => setTimeout(res, 9000));
 
-Promise.race([Promise.all([fontsReady, sceneReady, pageLoaded]), timeout]).then(() => {
+Promise.race([Promise.all([fontsReady, sceneReady, guideReady, pageLoaded]), timeout]).then(() => {
   setProg(100);
   setTimeout(() => {
     loaderStatus.textContent = tr('loader.ready');
@@ -528,10 +526,14 @@ function startGame() {
   window.scrollTo(0, 0);
   measure();
   if (scene) scene.start();
-  // On commence à observer les éléments à révéler
   $$('.reveal:not(.in)').forEach((el) => io.observe(el));
   $$('.reveal.in').forEach((el) => { $$('.pip.on', el).forEach((p) => p.classList.add('fill')); });
   onScroll();
+  showJob(false);
+  if (guide) {
+    guide.open();
+    setTimeout(() => guide.welcome(), 1400);
+  }
 }
 startBtn.addEventListener('click', startGame);
 window.addEventListener('keydown', (e) => { if (!started && !startBtn.hidden && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); startGame(); } });

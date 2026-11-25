@@ -1,10 +1,8 @@
-/** Textes du site en français et en anglais. */
-
 export const dict = {
   fr: {
-    'meta.title': 'Moubarack ILATEMA — Développeur Full-Stack & Designer',
+    'meta.title': 'Moubarack ILATEMA — Développeur de solutions numériques',
     'meta.desc':
-      'Portfolio de Moubarack ILATEMA : développeur full-stack freelance, étudiant en Génie Informatique. Découvrez mes projets en vidéo et lançons le vôtre.',
+      'Portfolio de Moubarack ILATEMA : développeur de solutions numériques, freelance et étudiant en Génie Informatique. Sites en ligne, applications en vidéo, et un formulaire pour démarrer votre projet.',
     skip: 'Aller au contenu',
 
     'nav.start': 'Départ',
@@ -24,12 +22,7 @@ export const dict = {
     'loader.hint': 'Astuce : faites défiler pour monter de niveau',
 
     'hero.eyebrow': 'Joueur 01 · Portfolio 2026',
-    'hero.roles': [
-      'Développeur Full-Stack',
-      'Freelance depuis 2 ans',
-      'Étudiant en Génie Informatique',
-      'Designer & monteur vidéo',
-    ],
+    'hero.job': 'Développeur de solutions numériques',
     'hero.pitch':
       'J’imagine, conçois et développe des applications web, mobiles et desktop — du modèle de données à l’interface. J’apprends vite, et je transforme chaque idée en un produit qui fonctionne vraiment.',
     'hero.cta1': 'Voir mes projets',
@@ -46,9 +39,9 @@ export const dict = {
     'profile.bio2':
       'Ma force : j’apprends très vite et je prends en main de nouvelles technologies sans friction. Passionné d’informatique, je diversifie volontairement mes compétences — développement, données, réseaux, DevOps, design — pour comprendre un produit de bout en bout.',
     'profile.quote':
-      'Mes projets freelance sont confidentiels. Plutôt que des liens vers des sites qui ne prouvent rien, je vous montre de vraies vidéos de projets qui tournent.',
+      'Mes projets freelance sont confidentiels. À la place, je vous propose des sites en ligne à visiter et de vraies vidéos de projets qui tournent.',
     'profile.stat1': 'ans de freelance',
-    'profile.stat2': 'projets en vidéo',
+    'profile.stat2': 'projets présentés',
     'profile.stat3': 'technologies pratiquées',
     'profile.q1.t': 'Apprentissage express',
     'profile.q1.d': 'Une nouvelle technologie ? Je la prends en main rapidement et je livre.',
@@ -75,13 +68,23 @@ export const dict = {
     'projects.kicker': 'Niveau 04',
     'projects.title': 'Projets',
     'projects.intro':
-      'Des projets personnels réalisés dans le cadre de ma formation pratique, présentés en vidéo. Ils tournent en local : ce que vous voyez est réel.',
+      'Deux sites vitrines en ligne et quatre applications présentées en vidéo : ce que vous voyez est réel.',
+    'projects.sites': 'Sites en ligne',
+    'projects.apps': 'Applications · démos vidéo',
+    'projects.live': 'En ligne',
+    'projects.visit': 'Visiter le site',
     'projects.watch': 'Lancer la démo',
     'projects.local': 'Démo locale',
     'projects.locked.badge': 'Classifié',
     'projects.locked.t': 'Projets freelance',
     'projects.locked.d':
       'Réalisés pour des entreprises et des particuliers, ils restent confidentiels. Parlons-en en direct.',
+    'project.hotel.t': 'Hôtel Paradisia',
+    'project.hotel.tag': 'Site vitrine',
+    'project.hotel.d': 'Le site vitrine de l’hôtel Paradisia : présenter l’établissement, ses chambres et ses services en ligne.',
+    'project.restaurant.t': 'Les Délices du Sénégal',
+    'project.restaurant.tag': 'Site vitrine',
+    'project.restaurant.d': 'Le site vitrine du restaurant Les Délices du Sénégal : présenter la cuisine, le menu et l’ambiance du lieu.',
     'project.event.t': 'Site d’événement',
     'project.event.tag': 'Événementiel',
     'project.event.d':
@@ -123,12 +126,23 @@ export const dict = {
 
     'footer.rights': '© 2026 Moubarack ILATEMA. Tous droits réservés.',
     'footer.top': 'Retour au départ',
+
+    'guide.level': 'Niveau',
+    'guide.off': 'Masquer le guide',
+    'guide.replay': 'Revoir le guide',
+    'guide.s0':
+      'Salut, moi c’est Moubarack ! Bienvenue dans mon monde. Je serai ton guide : pour commencer, clique sur « Voir mes projets ».',
+    'guide.s1': 'Voici mon profil. Pour continuer, clique sur « Compétences » dans le menu.',
+    'guide.s2': 'Voilà ce que je maîtrise. Clique maintenant sur « Projets » pour voir mes réalisations.',
+    'guide.s3':
+      'Clique sur un site pour le visiter, ou sur une application pour lancer sa démo vidéo. Ensuite, direction « Contact ».',
+    'guide.s4': 'Dernière étape ! Écris ton nom et ton e-mail, puis clique sur « Lancer la conversation ».',
   },
 
   en: {
-    'meta.title': 'Moubarack ILATEMA — Full-Stack Developer & Designer',
+    'meta.title': 'Moubarack ILATEMA — Digital solutions developer',
     'meta.desc':
-      'Portfolio of Moubarack ILATEMA: freelance full-stack developer and Computer Engineering student. Watch my projects in video and let’s start yours.',
+      'Portfolio of Moubarack ILATEMA: digital solutions developer, freelancer and Computer Engineering student. Live websites, applications on video, and a form to start your project.',
     skip: 'Skip to content',
 
     'nav.start': 'Start',
@@ -148,12 +162,7 @@ export const dict = {
     'loader.hint': 'Tip: scroll to level up',
 
     'hero.eyebrow': 'Player 01 · Portfolio 2026',
-    'hero.roles': [
-      'Full-Stack Developer',
-      'Freelancing for 2 years',
-      'Computer Engineering student',
-      'Designer & video editor',
-    ],
+    'hero.job': 'Digital solutions developer',
     'hero.pitch':
       'I imagine, design and build web, mobile and desktop applications — from the data model to the interface. I learn fast, and I turn every idea into a product that truly works.',
     'hero.cta1': 'See my projects',
@@ -170,9 +179,9 @@ export const dict = {
     'profile.bio2':
       'My strength: I learn very fast and pick up new technologies without friction. Passionate about computing, I deliberately broaden my skills — development, data, networking, DevOps, design — to understand a product end to end.',
     'profile.quote':
-      'My freelance work is confidential. Instead of links to websites that prove nothing, I show you real videos of projects that actually run.',
+      'My freelance work is confidential. Instead, I offer live websites to visit and real videos of projects that actually run.',
     'profile.stat1': 'years freelancing',
-    'profile.stat2': 'projects on video',
+    'profile.stat2': 'projects showcased',
     'profile.stat3': 'technologies practiced',
     'profile.q1.t': 'Express learner',
     'profile.q1.d': 'A new technology? I pick it up quickly and deliver.',
@@ -199,13 +208,23 @@ export const dict = {
     'projects.kicker': 'Level 04',
     'projects.title': 'Projects',
     'projects.intro':
-      'Personal projects built during my hands-on training, shown on video. They run locally: what you see is real.',
+      'Two live showcase websites and four applications shown on video: what you see is real.',
+    'projects.sites': 'Live websites',
+    'projects.apps': 'Applications · video demos',
+    'projects.live': 'Live',
+    'projects.visit': 'Visit the site',
     'projects.watch': 'Watch the demo',
     'projects.local': 'Local demo',
     'projects.locked.badge': 'Classified',
     'projects.locked.t': 'Freelance work',
     'projects.locked.d':
       'Built for companies and individuals, it remains confidential. Let’s talk about it live.',
+    'project.hotel.t': 'Hotel Paradisia',
+    'project.hotel.tag': 'Showcase website',
+    'project.hotel.d': 'The showcase website of Hotel Paradisia: presenting the hotel, its rooms and its services online.',
+    'project.restaurant.t': 'Les Délices du Sénégal',
+    'project.restaurant.tag': 'Showcase website',
+    'project.restaurant.d': 'The showcase website of the restaurant Les Délices du Sénégal: presenting its cuisine, its menu and its atmosphere.',
     'project.event.t': 'Event website',
     'project.event.tag': 'Events',
     'project.event.d':
@@ -247,6 +266,17 @@ export const dict = {
 
     'footer.rights': '© 2026 Moubarack ILATEMA. All rights reserved.',
     'footer.top': 'Back to start',
+
+    'guide.level': 'Level',
+    'guide.off': 'Hide the guide',
+    'guide.replay': 'Replay the guide',
+    'guide.s0':
+      'Hi, I’m Moubarack! Welcome to my world. I’ll be your guide: to start, click “See my projects”.',
+    'guide.s1': 'This is my profile. To continue, click “Skills” in the menu.',
+    'guide.s2': 'That’s what I master. Now click “Projects” to see my work.',
+    'guide.s3':
+      'Click a site to visit it, or an application to watch its video demo. Then head to “Contact”.',
+    'guide.s4': 'Last step! Enter your name and email, then click “Start the conversation”.',
   },
 };
 

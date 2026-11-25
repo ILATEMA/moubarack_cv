@@ -1,20 +1,9 @@
 'use strict';
 
-/**
- * Serveur de développement local (aucune dépendance en plus de nodemailer).
- *   npm install
- *   copie .env.example en .env et remplis-le
- *   npm run dev   ->   http://localhost:3000
- *
- * En production (Vercel), ce fichier n'est pas utilisé : Vercel sert /public
- * et exécute api/contact.js comme fonction serverless.
- */
-
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-// Mini lecteur de .env (évite d'ajouter la dépendance "dotenv")
 try {
   const envFile = fs.readFileSync(path.join(__dirname, '.env'), 'utf8');
   envFile.split(/\r?\n/).forEach((line) => {
@@ -24,7 +13,6 @@ try {
     }
   });
 } catch (e) {
-  /* pas de .env : ok pour tester uniquement le front */
 }
 
 const PUBLIC_DIR = path.join(__dirname, 'public');
@@ -80,7 +68,6 @@ const server = http.createServer(async (req, res) => {
   decorate(res);
   const url = new URL(req.url, `http://${req.headers.host}`);
 
-  // --- API ---
   if (url.pathname === '/api/contact') {
     try {
       const raw = req.method === 'POST' ? await readBody(req) : '';
@@ -89,7 +76,7 @@ const server = http.createServer(async (req, res) => {
       } catch (e) {
         req.body = {};
       }
-      delete require.cache[require.resolve('./api/contact.js')]; // recharge à chaque appel en dev
+      delete require.cache[require.resolve('./api/contact.js')];
       await require('./api/contact.js')(req, res);
     } catch (err) {
       console.error(err);
@@ -98,7 +85,6 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // --- Fichiers statiques ---
   let rel = decodeURIComponent(url.pathname);
   if (rel.endsWith('/')) rel += 'index.html';
   const filePath = path.normalize(path.join(PUBLIC_DIR, rel));
